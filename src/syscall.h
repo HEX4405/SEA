@@ -3,15 +3,16 @@
 
 #include <stdint.h>
 
-typedef struct pcb_s 
+typedef struct Context
 {
-	uint32_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, lr_svc,lr_user;
+	uint32_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, lr_svc, lr_user, sp_user, cpsr_user;
+} Context;
+
+typedef struct pcb_s 
+{	
+	Context context;
 } pcb_s;
 
-typedef struct context
-{
-	uint32_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, lr_svc, lr_user;
-} context;
 
 void sys_reboot();
 void swi_handler();
