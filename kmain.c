@@ -1,17 +1,20 @@
-#include "util.h"
-#include "syscall.h"
-#include "sched.h"
+#include "src/syscall.h"
+#include "src/sched.h"
+#include "src/hw.h"
+#include "asm_tools.h"
+#include "src/util.h"
 
-struct pcb_s *p1, *p2;
+#define NB_PROCESS 5
 
 void user_process_1()
 {
-    int v1=5;
+    int v1=0;
     while(1)
     {
         v1++;
-        sys_yieldto(p2);
+        sys_yield();
     }
+    
 }
 
 void user_process_2()
@@ -19,23 +22,44 @@ void user_process_2()
     int v2=-12;
     while(1)
     {
-        v2-=2;
-        sys_yieldto(p1);
+        v2--;
+        sys_yield();
     }
+    
 }
 
-void kmain( void )
-{    
+void user_process_3()
+{
+    int v3=0;
+    while(1)
+    {
+        v3+=2;
+        sys_yield();
+    }
+    
+}
+
+void kmain(void)
+{
     sched_init();
     
-    p1=create_process((func_t*)&user_process_1);
-    p2=create_process((func_t*)&user_process_2);
+    create_process((func_t*)&user_process_1);
+    create_process((func_t*)&user_process_2);
+    create_process((func_t*)&user_process_3);
     
-    __asm("cps 0x10"); // switch CPU to USER mode
-    // **********************************************************************
+    //Initialisation du timer et activation des interruptions
+    timer_init();
     
-    sys_yieldto(p1);
-
-    // this is now unreachable
+    ENABLE_IRQ();
+    
+    //Passage mode user
+    __asm("cps #0x10");
+	
+  
+    while(1)
+    {
+        sys_yield();
+    }
+  
     PANIC();
 }

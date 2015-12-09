@@ -1,11 +1,14 @@
 #include "syscall.h"
 
-typedef int (func_t) (void);
+#define STACK_SIZE 10000
 
 extern pcb_s* current_process;
 extern pcb_s kmain_process;
 
 void sched_init();
-pcb_s* create_process(func_t* entry);
+void create_process(func_t* entry);
+void delete_process(pcb_s* process);
+void start_current_process();
+void elect();
 
 
