@@ -19,9 +19,10 @@ void create_process(func_t* entry)
 {
 	pcb_s* process = (pcb_s*)kAlloc(sizeof(pcb_s));
 	process->entry = entry;
-	process->context.lr = (uint32_t)&start_current_process;
+	process->lr_user = (uint32_t)&start_current_process;
+	process->context.lr = process->lr_user;
 	process->sp_start = (uint32_t)kAlloc(STACK_SIZE);
-	process->context.sp = process->sp_start + STACK_SIZE;
+	process->sp = process->sp_start + STACK_SIZE;
 	
 	if(first_process == 0)
 	{
@@ -48,7 +49,7 @@ void delete_process(pcb_s* process)
 }
 void elect()
 {
-	while( current_process->next_process->current_state == TERMINATED )
+	while( current_process->next_process->current_state == TERMINATED && current_process != current_process->next_process)
 	{
 		pcb_s* next_process = current_process->next_process;
 		current_process->next_process = next_process->next_process;

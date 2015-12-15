@@ -43,18 +43,18 @@ void sys_yieldto(pcb_s* dest)
 	__asm("mov r1, %0" : : "r"(dest));
 	__asm("mov r0, #5");
 	__asm("swi #0");
-	__asm("mov sp, %0" : : "r"(current_process->context.sp));
-	__asm("mov lr, %0" : : "r"(current_process->context.lr));
-	__asm("msr cpsr, %0" : : "r"(current_process->context.cpsr));
+	__asm("mov sp, %0" : : "r"(current_process->sp));
+	__asm("mov lr, %0" : : "r"(current_process->lr_user));
+	__asm("msr cpsr, %0" : : "r"(current_process->cpsr));
 }
 
 void sys_yield()
 {
 	__asm("mov r0, #6");
 	__asm("swi #0");
-	__asm("mov sp, %0" : : "r"(current_process->context.sp));
-	__asm("mov lr, %0" : : "r"(current_process->context.lr_user));
-	__asm("msr cpsr, %0" : : "r"(current_process->context.cpsr));
+	__asm("mov sp, %0" : : "r"(current_process->sp));
+	__asm("mov lr, %0" : : "r"(current_process->lr_user));
+	__asm("msr cpsr, %0" : : "r"(current_process->cpsr));
 }
 
 void sys_exit(int status)
@@ -123,14 +123,13 @@ void __attribute__((naked)) swi_handler()
 	Context* current_context;
 	__asm("mov %0, sp" : "=r"(current_context));
 	save_context(current_context);
-	
 	__asm("cps #31");
-	__asm("mov %0, sp" : "=r"(current_process->context.sp));
-	__asm("mov %0, lr" : "=r"(current_process->context.lr_user));
+	__asm("mov %0, sp" : "=r"(current_process->sp));
+	__asm("mov %0, lr" : "=r"(current_process->lr_user));
 	__asm("cps #19");
 
 	//On récupère le spsr qui correspond au cpsr_user
-	__asm("mrs %0, spsr" : "=r"(current_process->context.cpsr));
+	__asm("mrs %0, spsr" : "=r"(current_process->cpsr));
 	//On récupère le numéro de l'appel système
 	int sysCallNumber = current_context->r0;
 	switch(sysCallNumber)
@@ -180,25 +179,25 @@ void __attribute__((naked)) irq_handler()
 	current_context->lr -= 4;
 	//Sauvegarde de contexte
 	save_context(current_context);
-	__asm("mrs %0, spsr" : "=r"(current_process->context.cpsr));
+	__asm("mrs %0, spsr" : "=r"(current_process->cpsr));
 	__asm("cps #31");
-	__asm("mov %0, sp" : "=r"(current_process->context.sp));
-	__asm("mov %0, lr" : "=r"(current_process->context.lr_user));
+	__asm("mov %0, sp" : "=r"(current_process->sp));
+	__asm("mov %0, lr" : "=r"(current_process->lr_user));
 	__asm("cps #18");
 
 	//CHANGEMENT PROCESSUS
 	do_sys_yield();
 
 	//Restauration de contexte
-	__asm("mrs %0, spsr" : "=r"(current_process->context.cpsr));
+	__asm("mrs %0, spsr" : "=r"(current_process->cpsr));
 	__asm("cps #31");
-	__asm("mov sp, %0" : : "r"(current_process->context.sp));
-	__asm("mov lr, %0" : : "r"(current_process->context.lr_user));
+	__asm("mov sp, %0" : : "r"(current_process->sp));
+	__asm("mov lr, %0" : : "r"(current_process->lr_user));
 	__asm("cps #18");
 
 	set_next_tick_default();
 	ENABLE_TIMER_IRQ();
-
+	
 	__asm("mov sp, %0" : : "r"(&(current_process->context)));
 	__asm("ldmfd sp!, {r0-r12,pc}^");
 }
@@ -209,6 +208,7 @@ void save_context(Context* current_context)
 	current_process->context.r0 = current_context->r0;
 	current_process->context.r1 = current_context->r1;
 	current_process->context.r2 = current_context->r2;
+	current_process->context.r3 = current_context->r3;
 	current_process->context.r4 = current_context->r4;
 	current_process->context.r5 = current_context->r5;
 	current_process->context.r6 = current_context->r6;

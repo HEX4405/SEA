@@ -12,31 +12,25 @@ void user_process_1()
     while(1)
     {
         v1++;
-        sys_yield();
     }
-    
 }
 
 void user_process_2()
 {
-    int v2=-12;
+    int v1=0;
     while(1)
     {
-        v2--;
-        sys_yield();
+        v1++;
     }
-    
 }
 
 void user_process_3()
 {
-    int v3=0;
+    int v1=0;
     while(1)
     {
-        v3+=2;
-        sys_yield();
+        v1++;
     }
-    
 }
 
 void kmain(void)
