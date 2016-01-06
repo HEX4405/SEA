@@ -8,38 +8,26 @@
 
 void user_process_1()
 {
-    int v1=0;
-    while(1)
-    {
-        v1++;
-    }
+
 }
 
 void user_process_2()
 {
-    int v1=0;
-    while(1)
-    {
-        v1++;
-    }
+    
 }
 
 void user_process_3()
 {
-    int v1=0;
-    while(1)
-    {
-        v1++;
-    }
+    
 }
 
 void kmain(void)
 {
     sched_init();
     
-    create_process((func_t*)&user_process_1);
-    create_process((func_t*)&user_process_2);
-    create_process((func_t*)&user_process_3);
+    create_process((func_t*)&user_process_1, 1);
+    create_process((func_t*)&user_process_2, 2);
+    create_process((func_t*)&user_process_3, 3);
     
     //Initialisation du timer et activation des interruptions
     timer_init();

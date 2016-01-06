@@ -6,9 +6,10 @@ extern pcb_s* current_process;
 extern pcb_s kmain_process;
 
 void sched_init();
-void create_process(func_t* entry);
+void create_process(func_t* entry, uint32_t priority);
 void delete_process(pcb_s* process);
 void start_current_process();
 void elect();
+pcb_s* get_max_priority_process();
 
 

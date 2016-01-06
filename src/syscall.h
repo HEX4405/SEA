@@ -5,7 +5,7 @@
 
 typedef int (func_t) (void);
 
-typedef enum states { RUNNING, TERMINATED } state;
+typedef enum states { RUNNING, WAITING, READY, TERMINATED } state;
 //SORTIR TOUT APRES LR
 typedef struct Context
 {
@@ -23,6 +23,7 @@ typedef struct pcb_s
 	state current_state; //Current state of pcb
 	uint32_t cpsr; //Status register
 	uint32_t sp; //Stack pointer
+	uint32_t priority; //Priority level for scheduling
 } pcb_s;
 
 

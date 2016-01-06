@@ -11,6 +11,15 @@ define reset
        set $pc=0
 end
 
+define print_process
+        print/x current_process
+        print current_process->current_state
+        print/x current_process->next_process
+        print current_process->next_process->current_state
+        print/x current_process->next_process->next_process
+        print current_process->next_process->next_process->current_state
+end
+
 define print_sr
        if $argc == 1
            set $value = $arg0
