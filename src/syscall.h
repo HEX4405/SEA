@@ -16,13 +16,13 @@ typedef struct pcb_s
 {	
 	Context context; //Registers LEAVE CONTEXT FIRST!!!!!!!!!
 	struct pcb_s* next_process;
-	uint32_t lr_user; //User link register
 	func_t* entry; //Entry point
 	uint32_t sp_start; //Start of pcb stack (Needed to free mem)
 	uint32_t status; //Return status
 	state current_state; //Current state of pcb
 	uint32_t cpsr; //Status register
 	uint32_t sp; //Stack pointer
+	uint32_t lr_user; //User link register
 	uint32_t priority; //Priority level for scheduling
 } pcb_s;
 
@@ -37,6 +37,7 @@ void sys_yield();
 void sys_yieldto();
 void sys_exit();
 void save_context(Context* context);
+void restore_context(Context* context);
 
 #endif // SYSCALL_H
 

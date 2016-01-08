@@ -17,12 +17,23 @@ void sched_init()
 
 void create_process(func_t* entry, uint32_t priority)
 {
-	pcb_s* process = (pcb_s*)kAlloc(sizeof(pcb_s));
+	int size = sizeof(pcb_s);
+	pcb_s* process = (pcb_s*)kAlloc(size);
 	process->entry = entry;
 	process->lr_user = (uint32_t)&start_current_process;
 	process->context.lr = process->lr_user;
 	process->sp_start = (uint32_t)kAlloc(STACK_SIZE);
 	process->sp = process->sp_start + STACK_SIZE;
+
+
+	//Code permettant de mesurer le temps d'éxecution du process afin de lui donner une priorité
+	/*uint64_t start = get_date_ms();
+	process->entry();
+	uint64_t end = get_date_ms();
+
+	uint64_t diffTime = start - end;*/
+
+
 
 	//Function to define priority
 	process->priority = priority;
@@ -77,7 +88,7 @@ void elect()
 	
 
 }
-
+// Returns the process with the highest priority (SJF)
 pcb_s* get_max_priority_process()
 {
 	if( current_process == &kmain_process )

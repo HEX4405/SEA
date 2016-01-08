@@ -52,9 +52,6 @@ void sys_yield()
 {
 	__asm("mov r0, #6");
 	__asm("swi #0");
-	__asm("mov sp, %0" : : "r"(current_process->sp));
-	__asm("mov lr, %0" : : "r"(current_process->lr_user));
-	__asm("msr cpsr, %0" : : "r"(current_process->cpsr));
 }
 
 void sys_exit(int status)
@@ -62,7 +59,6 @@ void sys_exit(int status)
 	__asm("mov r1, %0" : : "r"(status));
 	__asm("mov r0, #7");
 	__asm("swi #0");
-	sys_yield();
 }
 
 void do_sys_reboot()
@@ -160,13 +156,22 @@ void __attribute__((naked)) swi_handler()
 
 		case 7 :
 		do_sys_exit(current_context);
+		do_sys_yield();
 		break;
 
 		default :
 		PANIC();
 		break;
 	}
-	__asm("mov sp, %0" : : "r"(&(current_process->context)));
+	__asm("mrs %0, spsr" : "=r"(current_process->cpsr));
+	
+	__asm("cps #31");
+	__asm("mov sp, %0" : : "r"(current_process->sp));
+	__asm("mov lr, %0" : : "r"(current_process->lr_user));
+	__asm("cps #19");
+	
+	restore_context(current_context);
+	
 	__asm("ldmfd sp!, {r0-r12,pc}^");
 }
 
@@ -198,7 +203,8 @@ void __attribute__((naked)) irq_handler()
 	set_next_tick_default();
 	ENABLE_TIMER_IRQ();
 	
-	__asm("mov sp, %0" : : "r"(&(current_process->context)));
+	restore_context(current_context);
+	
 	__asm("ldmfd sp!, {r0-r12,pc}^");
 }
 
@@ -219,4 +225,22 @@ void save_context(Context* current_context)
 	current_process->context.r11 = current_context->r11;
 	current_process->context.r12 = current_context->r12;
 	current_process->context.lr = current_context->lr;
+}
+
+void restore_context(Context* current_context)
+{
+	current_context->r0 = current_process->context.r0;
+	current_context->r1 = current_process->context.r1;
+	current_context->r2 = current_process->context.r2;
+	current_context->r3 = current_process->context.r3;
+	current_context->r4 = current_process->context.r4;
+	current_context->r5 = current_process->context.r5;
+	current_context->r6 = current_process->context.r6;
+	current_context->r7 = current_process->context.r7;
+	current_context->r8 = current_process->context.r8;
+	current_context->r9 = current_process->context.r9;
+	current_context->r10 = current_process->context.r10;
+	current_context->r11 = current_process->context.r11;
+	current_context->r12 = current_process->context.r12;
+	current_context->lr = current_process->context.lr;
 }
