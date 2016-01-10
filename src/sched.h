@@ -11,5 +11,8 @@ void delete_process(pcb_s* process);
 void start_current_process();
 void elect();
 pcb_s* get_max_priority_process();
+void wakeup_processes();
+void delete_terminated_processes();
+void update_priorities(); 
 
 

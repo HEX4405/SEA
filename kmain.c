@@ -40,13 +40,26 @@ void user_process_3()
 {
     uart_send_str("Start of process 3\n");
     int v3=0;
-    while(v3 < 1000000000)
+    while(v3 < 1500000000)
     {
         v3++;
         //uart_send_int(v3);
         //uart_send_str("\n");
     }
     uart_send_str("End of process 3\n");
+}
+
+void user_process_4()
+{
+    uart_send_str("Start of process 4\n");
+    int v4=0;
+    while(v4 < 2000000000)
+    {
+        v4++;
+        //uart_send_int(v3);
+        //uart_send_str("\n");
+    }
+    uart_send_str("End of process 4\n");
 }
 
 void kmain(void)
@@ -56,10 +69,10 @@ void kmain(void)
     uart_init();
 
     
-    create_process((func_t*)&user_process_1, 1);
-    create_process((func_t*)&user_process_2, 2);
-    create_process((func_t*)&user_process_3, 3);
-    
+    create_process((func_t*)&user_process_1, 4);
+    create_process((func_t*)&user_process_2, 3);
+    create_process((func_t*)&user_process_3, 2);
+    create_process((func_t*)&user_process_4, 1);
 
 
     //Initialisation du timer et activation des interruptions

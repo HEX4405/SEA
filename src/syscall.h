@@ -16,6 +16,7 @@ typedef struct pcb_s
 {	
 	Context context; //Registers LEAVE CONTEXT FIRST!!!!!!!!!
 	struct pcb_s* next_process;
+	uint32_t id; //pid
 	func_t* entry; //Entry point
 	uint32_t sp_start; //Start of pcb stack (Needed to free mem)
 	uint32_t status; //Return status
