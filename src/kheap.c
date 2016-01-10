@@ -3,9 +3,18 @@
 
 
 struct fl {
-	struct fl	*next;
-	unsigned int	size;
+	struct fl		*next;
+	unsigned int	 size;
+	void 			*bloc;
 } *freelist = (struct fl *) 0;
+
+
+
+struct ol {
+	struct ol		*next;
+	unsigned int 	 size;
+	void 			*bloc;
+} *occupiedlist = (struct ol *)0;
 
 uint8_t* kernel_heap_top;
 uint8_t* kernel_heap_limit;
@@ -118,9 +127,79 @@ kFree(uint8_t* ptr, unsigned int size)
 	freelist = cfl;
 }
 
+void *gmalloc(unsigned int size)
+{
+	register struct fl *cfl = freelist, **prev;
+	unsigned int size_aligned = (size + 3) & ~3;
+
+	prev = &freelist;
+
+
+
+	
+	while(cfl && (cfl->size + sizeof(struct fl)) < (size_aligned  + sizeof(struct ol)))
+	{
+		prev = &cfl->next;
+		cfl = cfl->next;
+	}
+	if(!cfl)
+	{
+		return FORBIDDEN_ADDRESS;
+	}
+	else
+	{
+		if(cfl->size + sizeof(struct fl) > size_aligned + sizeof(struct ol))
+		{
+			uint8_t *temp = (uint8_t*)cfl + size_aligned + sizeof(struct ol);
+			struct fl *splitBloc = (struct fl *)(temp);
+			splitBloc->size = cfl->size - sizeof(struct ol) - size_aligned;
+			uint8_t *temp2 = (uint8_t*)cfl + size_aligned + sizeof(struct ol) + sizeof(struct fl);
+			splitBloc->bloc = temp2;
+			splitBloc->next = cfl->next;
+			(*prev) = splitBloc;
+		}
+		struct ol *fullBloc = (struct ol *)cfl;
+		fullBloc->size = size_aligned;
+		uint8_t *temp3 = (uint8_t*)cfl + sizeof(struct ol);
+		fullBloc->bloc = temp3;
+		if(!occupiedlist)
+		{
+			occupiedlist = fullBloc;
+		}
+		else
+		{
+			register struct ol* col = occupiedlist, **prevo;
+			prevo = &occupiedlist;
+			while(col && fullBloc > col)
+			{
+				prevo = &col->next;
+				col = col->next;
+			}
+			fullBloc->next = col;
+			(*prevo) = fullBloc;
+		}
+		return fullBloc->bloc;
+		
+	}
+	return FORBIDDEN_ADDRESS;
+}
+
+void gfree(void * ptr)
+{
+
+}
+
+
 void
 kheap_init()
 {
     kernel_heap_top = (uint8_t*) &__kernel_heap_start__;
     kernel_heap_limit = (uint8_t*) &__kernel_heap_end__;
+
+    freelist = (struct fl *)kernel_heap_top;
+
+    kernel_heap_top += sizeof(struct fl);
+
+    freelist->size = (unsigned int)( kernel_heap_limit - kernel_heap_top);
+    freelist->bloc = kernel_heap_top;
 }

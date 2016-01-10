@@ -3,6 +3,7 @@
 #include "src/hw.h"
 #include "asm_tools.h"
 #include "src/util.h"
+#include "src/kheap.h"
 #include "src/uart.h"
 
 #define NB_PROCESS 5
@@ -52,25 +53,23 @@ void user_process_3()
 void kmain(void)
 {
     sched_init();
-    
-    uart_init();
+    int *a = (int*)gmalloc(sizeof(int));
+    int *b = (int*)gmalloc(sizeof(int));
+    int *c = (int*)gmalloc(sizeof(int));
+    int *d = (int*)gmalloc(sizeof(int));
+    int *e = (int*)gmalloc(sizeof(int));
+    int *f = (int*)gmalloc(sizeof(int));
+    int *g = (int*)gmalloc(sizeof(int));
+    int *h = (int*)gmalloc(sizeof(int));
+    int *i = (int*)gmalloc(sizeof(int));
 
-    
-    create_process((func_t*)&user_process_1, 1);
-    create_process((func_t*)&user_process_2, 2);
-    create_process((func_t*)&user_process_3, 3);
-    
-
-
-    //Initialisation du timer et activation des interruptions
-    timer_init();
-    
-    ENABLE_IRQ();
-    
-    //Passage mode user
-    __asm("cps #0x10");
-	
-    while(1) {
-        sys_yield();
-    }
+    (*a) = 1;
+    (*b) = 2;
+    (*c) = 1;
+    (*d) = 2;
+    (*e) = 1;
+    (*f) = 2;
+    (*g) = 1;
+    (*h) = 2;
+    (*i) = 1;
 }
