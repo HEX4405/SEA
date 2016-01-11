@@ -186,7 +186,7 @@ void *gmalloc(unsigned int size)
 
 void gfree(void * ptr)
 {
-	uint8_t* spaceToClean = (uint8_t *) ptr - sizeof(struct ol);
+	uint8_t* spaceToClean = (((uint8_t *) ptr) - sizeof(struct ol));
 	struct ol * col = (struct ol *)spaceToClean;
 	struct fl *emptyBloc = (struct fl* ) spaceToClean;
 	emptyBloc->size = col->size;
