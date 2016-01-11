@@ -20,6 +20,11 @@ uint8_t* kAlloc(unsigned int size);
 void kFree(uint8_t* ptr, unsigned int size);
 void kheap_init();
 
+//Memory Allocation by François
+
+void *gmalloc(unsigned int size);
+void gfree(void *ptr);
+
 #define FORBIDDEN_BYTE ((uint8_t) 0x00)
 #define FORBIDDEN_ADDRESS (void*) 0xFFFFFFF0
 
