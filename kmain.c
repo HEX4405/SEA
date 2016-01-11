@@ -66,6 +66,9 @@ void user_process_4()
 void kmain(void)
 {
     sched_init();
+
+    uart_init();
+    
     int *a = (int*)gmalloc(sizeof(int));
     int *b = (int*)gmalloc(sizeof(int));
     int *c = (int*)gmalloc(sizeof(int));
