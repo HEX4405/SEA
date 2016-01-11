@@ -21,12 +21,12 @@ void sched_init()
 void create_process(func_t* entry, uint32_t priority)
 {
 	int size = sizeof(pcb_s);
-	pcb_s* process = (pcb_s*)kAlloc(size);
+	pcb_s* process = (pcb_s*)gmalloc(size);
 	process->id = ++pcb_count;
 	process->entry = entry;
 	process->lr_user = (uint32_t)&start_current_process;
 	process->context.lr = process->lr_user;
-	process->sp_start = (uint32_t)kAlloc(STACK_SIZE);
+	process->sp_start = (uint32_t)gmalloc(STACK_SIZE);
 	process->sp = process->sp_start + STACK_SIZE;
 	process->priority = priority;
 	
@@ -53,8 +53,10 @@ void start_current_process()
 //Free mem used by the pcb and it's stack
 void delete_process(pcb_s* process)
 {
-	kFree((uint8_t*)process->sp_start, STACK_SIZE);
-	kFree((uint8_t*)process,sizeof(pcb_s));
+	gfree((uint8_t*)process->sp_start);
+	gfree((uint8_t*)process);
+	//kFree((uint8_t*)process->sp_start, STACK_SIZE);
+	//kFree((uint8_t*)process,sizeof(pcb_s));
 }
 void elect()
 {

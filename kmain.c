@@ -66,10 +66,8 @@ void user_process_4()
 void kmain(void)
 {
     sched_init();
-
-    //uart_init();
     
-    int *a = (int*)gmalloc(sizeof(int));
+    /*int *a = (int*)gmalloc(sizeof(int));
     int *b = (int*)gmalloc(sizeof(int));
     int *c = (int*)gmalloc(sizeof(int));
     int *d = (int*)gmalloc(sizeof(int));
@@ -90,10 +88,27 @@ void kmain(void)
     (*i) = 9;
 
     gfree(a);
-    gfree(b);
+    gfree(b);*/
 
-    int *x = (int*)gmalloc(sizeof(int));
-    int *y = (int *)gmalloc(sizeof(double));
-    (*x) = 9;
-    (*y) = 20;
+    uart_init();
+
+    
+    create_process((func_t*)&user_process_1, 4);
+    create_process((func_t*)&user_process_2, 3);
+    create_process((func_t*)&user_process_3, 2);
+    create_process((func_t*)&user_process_4, 1);
+
+
+    //Initialisation du timer et activation des interruptions
+    timer_init();
+    
+    ENABLE_IRQ();
+    
+    //Passage mode user
+    __asm("cps #0x10");
+    
+    while(1) {
+        sys_yield();
+    }
+
 }
