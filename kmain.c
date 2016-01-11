@@ -93,5 +93,7 @@ void kmain(void)
     gfree(b);
 
     int *x = (int*)gmalloc(sizeof(int));
+    int *y = (int *)gmalloc(sizeof(double));
     (*x) = 9;
+    (*y) = 20;
 }

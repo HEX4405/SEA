@@ -175,6 +175,7 @@ void *gmalloc(unsigned int size)
 				prevo = &col->next;
 				col = col->next;
 			}
+
 			fullBloc->next = col;
 			(*prevo) = fullBloc;
 		}
@@ -188,6 +189,11 @@ void gfree(void * ptr)
 {
 	uint8_t* spaceToClean = (uint8_t *) ptr - sizeof(struct ol);
 	struct ol * col = (struct ol *)spaceToClean;
+	if(col == occupiedlist)
+	{
+		struct ol ** temp = &occupiedlist;
+		(*temp) = col->next;
+	}
 	struct fl *emptyBloc = (struct fl* ) spaceToClean;
 	emptyBloc->size = col->size;
 	emptyBloc->bloc = col->bloc;
@@ -196,7 +202,7 @@ void gfree(void * ptr)
 	prev = (struct ol**)&spaceToClean;
 	(*prev) = col->next;
 
-	struct fl * cfl = freelist, **prevf;
+	register struct fl * cfl = freelist, **prevf;
 	prevf = &freelist;
 	while(cfl && emptyBloc > cfl)
 	{
