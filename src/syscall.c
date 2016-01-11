@@ -180,6 +180,7 @@ void __attribute__((naked)) swi_handler()
 
 void __attribute__((naked)) irq_handler()
 {
+	//On empile les registres
 	__asm("stmfd sp!, {r0-r12,lr}");
 	Context* current_context;
 	__asm("mov %0, sp" : "=r"(current_context));
@@ -202,16 +203,17 @@ void __attribute__((naked)) irq_handler()
 	__asm("mov sp, %0" : : "r"(current_process->sp));
 	__asm("mov lr, %0" : : "r"(current_process->lr_user));
 	__asm("cps #18");
+	restore_context(current_context);
 
+	//Réactivation du timer
 	set_next_tick_default();
 	ENABLE_TIMER_IRQ();
 	
-	restore_context(current_context);
-	
+	//On dépile les registres
 	__asm("ldmfd sp!, {r0-r12,pc}^");
 }
 
-
+//Sauvegarde le contexte dans le pcb
 void save_context(Context* current_context)
 {
 	current_process->context.r0 = current_context->r0;
@@ -230,6 +232,7 @@ void save_context(Context* current_context)
 	current_process->context.lr = current_context->lr;
 }
 
+//Restaure le contexte dans la pile
 void restore_context(Context* current_context)
 {
 	current_context->r0 = current_process->context.r0;

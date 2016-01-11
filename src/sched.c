@@ -17,6 +17,7 @@ void sched_init()
 	last_process = current_process;
 }
 
+//Allocate memory to the pcb and it's stack
 void create_process(func_t* entry, uint32_t priority)
 {
 	int size = sizeof(pcb_s);
@@ -27,18 +28,6 @@ void create_process(func_t* entry, uint32_t priority)
 	process->context.lr = process->lr_user;
 	process->sp_start = (uint32_t)kAlloc(STACK_SIZE);
 	process->sp = process->sp_start + STACK_SIZE;
-
-
-	//Code permettant de mesurer le temps d'éxecution du process afin de lui donner une priorité
-	/*uint64_t start = get_date_ms();
-	process->entry();
-	uint64_t end = get_date_ms();
-
-	uint64_t diffTime = start - end;*/
-
-
-
-	//Function to define priority
 	process->priority = priority;
 	
 	if(first_process == 0)
@@ -53,6 +42,7 @@ void create_process(func_t* entry, uint32_t priority)
     process->current_state = READY;
 }
 
+//pcb "wrap", to make it exit without having the user do it
 void start_current_process()
 {
 	current_process->current_state = RUNNING; 
@@ -60,6 +50,7 @@ void start_current_process()
 	sys_exit(0);
 }
 
+//Free mem used by the pcb and it's stack
 void delete_process(pcb_s* process)
 {
 	kFree((uint8_t*)process->sp_start, STACK_SIZE);
@@ -77,15 +68,15 @@ void elect()
 	//Wake up sleeping processes
 	wakeup_processes();
 
-	//If the process isn't terminated, make it sleep
+	//Put the running process to sleep
 	if( current_process->current_state == RUNNING)
 	{
 		current_process->current_state = WAITING;
 	}
 	
-	
 	delete_terminated_processes();
 	
+	//If process isn't alone, elect new one
 	if( current_process != current_process->next_process ) 
 	{
 		current_process = get_max_priority_process();
