@@ -201,7 +201,7 @@ void gfree(void * ptr)
 	while(cfl && emptyBloc > cfl)
 	{
 		prevf = &cfl->next;
-		col = col->next;
+		cfl = cfl->next;
 	}
 	emptyBloc->next = cfl;
 	(*prevf) = emptyBloc;
