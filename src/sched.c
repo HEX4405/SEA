@@ -7,6 +7,7 @@ pcb_s* first_process;
 pcb_s* last_process;
 pcb_s kmain_process;
 int pcb_count;
+int DYNAMIC_PRIORITIES=1;
 
 void sched_init()
 {
@@ -83,7 +84,8 @@ void elect()
 	{
 		current_process = get_max_priority_process();
 		current_process->current_state = RUNNING;
-		//update_priorities();
+		if ( DYNAMIC_PRIORITIES  )
+			update_priorities();
 	}
 	else if( current_process->current_state == TERMINATED )
 	{
