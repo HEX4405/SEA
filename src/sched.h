@@ -15,4 +15,6 @@ void wakeup_processes();
 void delete_terminated_processes();
 void update_priorities(); 
 
+void terminate_current_process();
+//for data_handler in vmem.c
 

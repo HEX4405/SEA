@@ -11,7 +11,6 @@
 #define FIRST_LVL_TT_DEBUT 0x48000
 #define KERNEL_HEAP_END 0x1000000
 #define FRAME_TABLE_BASE 0x44c000
-#define FRAME_TABLE_SIZE_OCT
 
 #define ADR_TABLE_FRAME_LIBRE_SYST 0x4c000
 #define SIZE_TABLE_FRAME_LIBRE_SYST 4832
@@ -42,8 +41,17 @@ void start_mmu_C();
 void configure_mmu_C();
 
 unsigned int init_kern_translation_table();
+//alloue puis initialise la table des pages de l'OS
 void vmem_init();
+//initialise la memoire physique
+
+unsigned int *creer_espace_virtuel_processus();
+//appelé par sched
 
 void* sys_mmap(unsigned int size);
+//Alloue size octets dans l'espace d'adressage du processus courant
 void sys_munmap(void* addr, unsigned int size);
+//libere size octets alloués dans l'espace d'adressage à partir de addr 
 
+void commute_to_sys();
+//appelé par sched
