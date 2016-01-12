@@ -2,6 +2,8 @@
 #include "vmem.h"
 #include "sched.h"
 
+unsigned int *adr_table_hyperPage=FIRST_LVL_TT_DEBUT;
+
 void start_mmu_C()
 {
 	register unsigned int control;
@@ -242,4 +244,61 @@ void commute_mmu(){
 void commute_to_sys()
 {
 	commute_mmu();
+}
+
+unsigned int* creer_espace_virtuel_processus() {
+	unsigned int *table_page_lvl1_global=adr_table_hyperPage;
+	unsigned int *table_page_lvl1=reserver_16page_pour_systeme();
+
+	// les premieres adresses (de 0x0 a 0x500000)
+	int i=0;
+
+	for (i=0;i<5;i++){
+			
+			table_page_lvl1[i]= table_page_lvl1_global[i];			
+	}
+	// les adresses défaut de tradiction
+	for (i=5;i<0x200;i++){
+		table_page_lvl1[i]=0;
+	}
+	// les adresses périphériques
+	for (i=0x200; i<0x20F; i++){
+
+		table_page_lvl1[i]= table_page_lvl1_global[i];			
+	}
+	return table_page_lvl1;
+}
+
+unsigned int * reserver_16page_pour_systeme(){
+	int indice_libre=get_indice_16frame_system_libres();
+	if (indice_libre!=-1) {
+		char * table_frame=ADR_TABLE_FRAME_LIBRE_SYST;
+		int i=0;
+		for (i=0;i<16;i++){
+			table_frame[indice_libre+i]=1;
+		}		
+		return get_adr_dindice_frame_systeme(indice_libre);
+	}
+	return (unsigned int *) 0;	
+}
+
+int get_indice_16frame_system_libres(){
+	char * table_frame=ADR_TABLE_FRAME_LIBRE_SYST;
+	int i=160;
+	int j=0;
+	int cpt=0;
+	while (i<SIZE_TABLE_FRAME_LIBRE_SYST-16){
+		cpt=0;
+		for (j=i;j<i+16;j++){
+			if (table_frame[j]==1) break;
+			cpt++;
+		}
+		if (cpt==16) return i;
+		i+=16;
+	}
+	return -1;
+}
+
+unsigned int *get_adr_dindice_frame_systeme(int i){
+	return (unsigned int *) (ADR_TABLE_FRAME_LIBRE_SYST+i*1024);	
 }

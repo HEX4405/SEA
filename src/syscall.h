@@ -25,6 +25,9 @@ typedef struct pcb_s
 	uint32_t sp; //Stack pointer
 	uint32_t lr_user; //User link register
 	uint32_t priority; //Priority level for scheduling
+	
+	//add for chp.9
+	unsigned int* tablePageLvl1;
 } pcb_s;
 
 

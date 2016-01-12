@@ -22,7 +22,8 @@ void sched_init()
 void create_process(func_t* entry, uint32_t priority)
 {
 	int size = sizeof(pcb_s);
-	pcb_s* process = (pcb_s*)gmalloc(size);
+	//pcb_s* process = (pcb_s*)gmalloc(size);
+	pcb_s* process = (pcb_s*)sys_mmap(size);
 	process->id = ++pcb_count;
 	process->entry = entry;
 	process->lr_user = (uint32_t)&start_current_process;
@@ -42,6 +43,9 @@ void create_process(func_t* entry, uint32_t priority)
     last_process->next_process = first_process;
     
     process->current_state = READY;
+	
+	//CP9
+	process.tablePageLvl1=creer_espace_virtuel_processus();
 }
 
 //pcb "wrap", to make it exit without having the user do it
@@ -152,8 +156,69 @@ void update_priorities()
 	} while(tmp_process != current_process);
 }
 
+__attribute__ ((naked)) void ctx_switch_from_irq()
+{
+	DISABLE_IRQ();
+	
+	__asm("sub lr,lr,#4");
+	__asm("srsdb sp!, #0x1F");
+	__asm("cps #0x1F"); // mode SYS
+	__asm("push {r0 - r12}");
+	__asm("push {lr}");
+	__asm("mov %0,sp" : "=r"((current_process->pcb_s).sp));
+	__asm("cps #0x13"); // mode SVC
+	
+	commute_to_sys();
+	
+	wakeup_processes();
+	changeCTX();
+}
+
 __attribute__ ((naked)) teminate_current_process()
 {
 	(current_process -> pcb_s).current_state = TERMINATED;
+	ctx_switch_from_irq();
+}
+
+void changeCTX()
+{
+	elect();
+	load_ctx();
+}
+
+void load_ctx() {
+    __asm("cps #0x1F"); //mode Syst鑝e
 	
+	adr_table_hyperPage=current_process->pcb_s.tablePageLvl1;
+        //commuteMMU();
+		__asm("MCR p15,0,r0,c8, c6,0"); //Invalidate TLB */
+	
+		__asm volatile("mcr p15, 0, %[addr], c2, c0, 0" : : [addr] "r" (adr_table_hyperPage));
+		__asm volatile("mcr p15, 0, %[addr], c2, c0, 1" : : [addr] "r" (adr_table_hyperPage));
+		__asm volatile("mcr p15, 0, %[n], c2, c0, 2" : : [n] "r" (0));
+		__asm volatile("mcr p15, 0, %[r], c3, c0, 0" : : [r] "r" (0x3));
+	
+	__asm("mov sp,%0" : : "r"((current_process->pcb_s).sp)); // sp=(current_process->pcbE).sp
+	__asm("cps #0x13"); //mode Superviseur
+    if ((current_process->pcb_s).current_state==READY) {
+        (current_process->pcb_s).current_state=RUNNING;
+        set_tick_and_enable_timer();
+        ENABLE_IRQ();
+        start_current_process();
+    } else {
+        //Restauration du contexte
+		
+		
+		__asm("cps #0x1F"); //mode Syst鑝e
+		__asm("pop {lr}");
+		__asm("pop {r0-r12}");
+		__asm("cps #0x13"); //mode Superviseur
+		(current_process->pcb_s).current_state=RUNNING;
+		set_next_tick_default();
+		ENABLE_IRQ();
+		__asm("cps #0x1F");
+        
+        //-----------------------------------------------------------------
+		__asm("rfeia sp!");
+    }
 }
