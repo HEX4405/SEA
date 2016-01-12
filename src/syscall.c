@@ -105,7 +105,10 @@ void do_sys_yield()
 	elect();
 	uart_send_str("Elected process : ");
 	uart_send_int(current_process->id);
+	uart_send_str(" priority : ");
+	uart_send_int(current_process->priority);
 	uart_send_str("\n");
+
 }
 
 void do_sys_exit(Context* current_context)

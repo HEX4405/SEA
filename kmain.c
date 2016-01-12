@@ -54,10 +54,10 @@ void user_process_4()
 {
     uart_send_str("Start of process 4\n");
     int v4=0;
-    while(v4 < 2000000000)
+    while(v4 < 1500000000)
     {
         v4++;
-        //uart_send_int(v3);
+        //uart_send_int(v4);
         //uart_send_str("\n");
     }
     uart_send_str("End of process 4\n");
@@ -66,29 +66,6 @@ void user_process_4()
 void kmain(void)
 {
     sched_init();
-    
-    /*int *a = (int*)gmalloc(sizeof(int));
-    int *b = (int*)gmalloc(sizeof(int));
-    int *c = (int*)gmalloc(sizeof(int));
-    int *d = (int*)gmalloc(sizeof(int));
-    int *e = (int*)gmalloc(sizeof(int));
-    int *f = (int*)gmalloc(sizeof(int));
-    int *g = (int*)gmalloc(sizeof(int));
-    int *h = (int*)gmalloc(sizeof(int));
-    int *i = (int*)gmalloc(sizeof(int));
-
-    (*a) = 1;
-    (*b) = 2;
-    (*c) = 3;
-    (*d) = 4;
-    (*e) = 5;
-    (*f) = 6;
-    (*g) = 7;
-    (*h) = 8;
-    (*i) = 9;
-
-    gfree(a);
-    gfree(b);*/
 
     uart_init();
 

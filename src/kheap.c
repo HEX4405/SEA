@@ -148,7 +148,7 @@ void *gmalloc(unsigned int size)
 	}
 	else
 	{
-		if(cfl->size + sizeof(struct fl) > size_aligned + sizeof(struct ol))
+		if(cfl->size + sizeof(struct fl) - (size_aligned + sizeof(struct ol)) >= 16)
 		{
 			uint8_t *temp = (uint8_t*)cfl + size_aligned + sizeof(struct ol);
 			struct fl *splitBloc = (struct fl *)(temp);
@@ -158,6 +158,17 @@ void *gmalloc(unsigned int size)
 			splitBloc->next = cfl->next;
 			(*prev) = splitBloc;
 		}
+		else if(cfl->size + sizeof(struct fl) - (size_aligned + sizeof(struct ol)) < 16 && cfl->size + sizeof(struct fl) - (size_aligned + sizeof(struct ol)) > 0)
+		{
+			size_aligned += cfl->size - size_aligned;
+		}
+
+		if(cfl == freelist)
+		{
+			struct fl ** temp3 = &freelist;
+			(*temp3) = cfl->next;
+		}
+
 		struct ol *fullBloc = (struct ol *)cfl;
 		fullBloc->size = size_aligned;
 		uint8_t *temp3 = (uint8_t*)cfl + sizeof(struct ol);
@@ -170,7 +181,7 @@ void *gmalloc(unsigned int size)
 		{
 			register struct ol* col = occupiedlist, **prevo;
 			prevo = &occupiedlist;
-			while(col && fullBloc > col)
+			while(col && fullBloc >= col)
 			{
 				prevo = &col->next;
 				col = col->next;
@@ -188,23 +199,24 @@ void *gmalloc(unsigned int size)
 void gfree(void * ptr)
 {
 	uint8_t* spaceToClean = (uint8_t *) ptr - sizeof(struct ol);
-	struct ol * col = (struct ol *)spaceToClean;
-	if(col == occupiedlist)
+
+
+	register struct ol * col = occupiedlist, **prev;
+	prev = &occupiedlist;
+	while(col && (struct ol*)spaceToClean > col)
 	{
-		struct ol ** temp = &occupiedlist;
-		(*temp) = col->next;
+		prev = &col->next;
+		col = col->next;
 	}
+	(*prev) = col->next;
+
 	struct fl *emptyBloc = (struct fl* ) spaceToClean;
 	emptyBloc->size = col->size;
 	emptyBloc->bloc = col->bloc;
 
-	struct ol **prev;
-	prev = (struct ol**)&spaceToClean;
-	(*prev) = col->next;
-
 	register struct fl * cfl = freelist, **prevf;
 	prevf = &freelist;
-	while(cfl && emptyBloc > cfl)
+	while(cfl && emptyBloc >= cfl)
 	{
 		prevf = &cfl->next;
 		cfl = cfl->next;

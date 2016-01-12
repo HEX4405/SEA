@@ -53,10 +53,10 @@ void start_current_process()
 //Free mem used by the pcb and it's stack
 void delete_process(pcb_s* process)
 {
-	gfree((uint8_t*)process->sp_start);
-	gfree((uint8_t*)process);
-	//kFree((uint8_t*)process->sp_start, STACK_SIZE);
-	//kFree((uint8_t*)process,sizeof(pcb_s));
+	//gfree((uint8_t*)process->sp_start);
+	//gfree((uint8_t*)process);
+	kFree((uint8_t*)process->sp_start, STACK_SIZE);
+	kFree((uint8_t*)process,sizeof(pcb_s));
 }
 void elect()
 {
@@ -83,6 +83,7 @@ void elect()
 	{
 		current_process = get_max_priority_process();
 		current_process->current_state = RUNNING;
+		//update_priorities();
 	}
 	else if( current_process->current_state == TERMINATED )
 	{
@@ -91,7 +92,7 @@ void elect()
 		sys_reboot();
 	}
 	
-	update_priorities();
+	current_process->current_state = RUNNING;
 
 }
 // Returns the process with the highest priority (SJF)

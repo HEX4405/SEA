@@ -14,10 +14,16 @@ end
 define print_process
         print/x current_process
         print current_process->current_state
+        print current_process->priority
         print/x current_process->next_process
         print current_process->next_process->current_state
+        print current_process->next_process->priority
         print/x current_process->next_process->next_process
         print current_process->next_process->next_process->current_state
+        print current_process->next_process->next_process->priority
+        print/x current_process->next_process->next_process->next_process
+        print current_process->next_process->next_process->next_process->current_state
+        print current_process->next_process->next_process->next_process->priority
 end
 
 define print_sr
