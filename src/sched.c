@@ -1,6 +1,7 @@
 #include "sched.h"
 #include "kheap.h"
 #include "hw.h"
+#include "vmem.h"
  
 pcb_s* current_process;
 pcb_s* first_process;
@@ -26,7 +27,8 @@ void create_process(func_t* entry, uint32_t priority)
 	process->entry = entry;
 	process->lr_user = (uint32_t)&start_current_process;
 	process->context.lr = process->lr_user;
-	process->sp_start = (uint32_t)gmalloc(STACK_SIZE);
+	//process->sp_start = (uint32_t)gmalloc(STACK_SIZE);
+	process->sp_start = (uint32_t)sys_mmap(STACK_SIZE);
 	process->sp = process->sp_start + STACK_SIZE;
 	process->priority = priority;
 	
@@ -148,4 +150,10 @@ void update_priorities()
 		}
 		tmp_process = tmp_process->next_process;
 	} while(tmp_process != current_process);
+}
+
+__attribute__ ((naked)) teminate_current_process()
+{
+	(current_process -> pcb_s).current_state = TERMINATED;
+	
 }

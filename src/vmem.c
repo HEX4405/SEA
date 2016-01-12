@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "vmem.h"
-#include "sched.c"
+#include "sched.h"
 
 void start_mmu_C()
 {
@@ -192,16 +192,15 @@ void sys_munmap(void* addr, unsigned int size)
 	unsigned int tt1_index = adresseVirtuelle >> 20;
 	unsigned int tt2_index = (adresseVirtuelle >> 12) & 0xFF;
 
-	unsigned int *tt1_base = (unsigned int *)TT1_BASE;
+	unsigned int *tt1_base = (unsigned int *)FIRST_LVL_TT_DEBUT;
 	unsigned int *tt2_base = (unsigned int *) (tt1_base[tt1_index] & 0xFFFFFC00);
 	unsigned int *tt2_end = tt2_base + tt2_index + nbPages;
 
 	for (unsigned int *tt2_cell = tt2_base + tt2_index; tt2_cell < tt2_end; ++tt2_cell) {
 		uint8_t *frame_table = (uint8_t *) FRAME_TABLE_BASE;
-		// Getting the frame cell (index is address of the frame divided by size of frame)
-		uint8_t *frame_cell = frame_table + ((*tt2_cell & 0xFFFFF000) >> 12); // >> 12 is / PAGE_SIZE_OCT
+		uint8_t *frame_cell = frame_table + ((*tt2_cell & 0xFFFFF000) >> 12); 
 		*frame_cell = 0;
-		*tt2_cell &= 0xFFFFFFFC; // translation fault
+		*tt2_cell &= 0xFFFFFFFC; 
 	}
 }
 
@@ -232,4 +231,15 @@ __attribute__ ((naked)) data_handler() {
 			break;
 	}
 	//__asm("mov lr,%0" : : "r"(lrGlobal)); //lr = lrGlobal
+}
+
+void commute_mmu(){
+	__asm("MCR p15,0,r0,c8,c6,0");
+	configure_mmu_C();
+	start_mmu_C();
+}
+
+void commute_to_sys()
+{
+	commute_mmu();
 }
